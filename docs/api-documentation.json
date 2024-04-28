@@ -1,0 +1,10 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Gassin Apps API",
+        "description": "Gassin Apps API for Integrate data All Apps",
+        "version": "1.0"
+    },
+    "servers": [{ "url": "http://localhost:8000" }],
+    "paths": {}
+}
