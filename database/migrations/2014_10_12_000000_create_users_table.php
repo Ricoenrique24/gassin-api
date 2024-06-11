@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('phone')->unique();
             $table->string('role');
             $table->string('apikey')->unique();
+            $table->string('token_fcm')->nullable(true);
             $table->timestamps();
         });
     }
