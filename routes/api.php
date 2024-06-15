@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\API\Manager\CustomerController;
+use App\Http\Controllers\API\Manager\StoreController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\Auth\AuthController;
@@ -21,9 +23,10 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware(['auth.apikey', 'role:manager'])->prefix('manager')->group(function () {
-    // Route::prefix('transactions')->group(function () {
-
-    // });
+    Route::apiResource('store', StoreController::class);
+    Route::get('search/stores', [StoreController::class, 'search']);
+    // Route::get('/food/{searchAll?}', [ApiMenuController::class, 'product_food'])->where('searchAll', '.*');
+    Route::apiResource('customer', CustomerController::class);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

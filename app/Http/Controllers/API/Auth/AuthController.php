@@ -30,10 +30,9 @@ class AuthController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false,
-                'message' => 'Ada kesalahan',
-                'data' => $validator->errors()
-            ], 422);
+                'error' => true,
+                'message' => $validator->errors(),
+            ]);
         }
 
         $input = $request->all();
@@ -43,10 +42,9 @@ class AuthController extends Controller
         $user = User::create($input);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Berhasil registrasi',
-            'data' => $user
-        ], 201);
+            'error' => false,
+            'message' => 'User Created',
+        ]);
     }
 
 
@@ -55,16 +53,23 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
-            'password' => 'required|string',
+            'password' => 'required|string|min:8',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => true,
+                'message' => $validator->errors(),
+            ]);
+        }
 
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
-                'success' => false,
+                'error' => false,
                 'message' => 'Email atau password salah',
             ], 401);
         }
@@ -75,10 +80,10 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Login success',
-            'data' => $user
-        ], 200);
+            'error' => false,
+            'message' => 'success',
+            'loginResult' => $user
+        ]);
     }
 
 

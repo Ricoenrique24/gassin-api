@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 
 class ApiKeyAuth
@@ -16,13 +16,28 @@ class ApiKeyAuth
      */
     public function handle(Request $request, Closure $next)
     {
-        $apiKey = $request->header('Authorization');
+        $authorizationHeader = $request->header('Authorization');
+        Log::info('Authorization Header: ' . $authorizationHeader);
 
-        if (!$apiKey || !User::where('apikey', $apiKey)->exists()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+        if (!$authorizationHeader) {
+            return response()->json(['message' => 'API key not provided'], 401);
         }
 
-        $request->user = User::where('apikey', $apiKey)->first();
+        if (strpos($authorizationHeader, 'Bearer ') === 0) {
+            $apiKey = substr($authorizationHeader, 7);
+        } else {
+            return response()->json(['message' => 'Invalid Authorization header'], 401);
+        }
+
+        Log::info('Extracted API Key: ' . $apiKey);
+
+        $user = User::where('apikey', $apiKey)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Invalid API key'], 401);
+        }
+
+        $request->merge(['user' => $user]);
 
         return $next($request);
     }

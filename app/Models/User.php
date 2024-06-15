@@ -29,6 +29,10 @@ class User extends Authenticatable
         'apikey',
         'token_fcm',
     ];
+    public function hasRole($role)
+    {
+        return $this->role === $role;
+    }
 
     /**
      * The attributes that should be hidden for serialization.
