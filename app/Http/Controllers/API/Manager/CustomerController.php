@@ -46,19 +46,19 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        $store = Customer::find($id);
+        $customer = Customer::find($id);
 
-        if (!$store) {
+        if (!$customer) {
             return response()->json([
                 "error" => true,
-                'message' => 'Store not found'
+                'message' => 'Customer not found'
             ]);
         }
 
         return response()->json([
             "error" => false,
             "message" => "Store fetched successfully",
-            "store" => $store
+            "customer" => $customer
         ]);
     }
 
@@ -109,6 +109,25 @@ class CustomerController extends Controller
         return response()->json([
             "error" => false,
             'message' => 'Customer deleted successfully'
+        ]);
+    }
+
+    public function search(Request $request)
+    {
+        // Validasi input query
+        $validated = $request->validate([
+            'q' => 'required|string|max:255',
+        ]);
+
+        // Dapatkan nilai query yang telah divalidasi
+        $query = $validated['q'];
+
+        $customers = Customer::search($query);
+
+        return response()->json([
+            "error" => false,
+            "message" => "Customers fetched successfully",
+            "listCustomer" => $customers
         ]);
     }
 }

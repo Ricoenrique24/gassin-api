@@ -25,8 +25,8 @@ Route::prefix('auth')->group(function () {
 Route::middleware(['auth.apikey', 'role:manager'])->prefix('manager')->group(function () {
     Route::apiResource('store', StoreController::class);
     Route::get('search/stores', [StoreController::class, 'search']);
-    // Route::get('/food/{searchAll?}', [ApiMenuController::class, 'product_food'])->where('searchAll', '.*');
     Route::apiResource('customer', CustomerController::class);
+    Route::get('search/customers', [CustomerController::class, 'search']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
