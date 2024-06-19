@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\API\Transaction\StatusTransactionController;
+use App\Http\Controllers\API\Manager\PurchaseTransactionController;
+use App\Http\Controllers\API\Manager\EmployeeController;
 use App\Http\Controllers\API\Manager\CustomerController;
 use App\Http\Controllers\API\Manager\StoreController;
 use Illuminate\Http\Request;
@@ -27,7 +30,13 @@ Route::middleware(['auth.apikey', 'role:manager'])->prefix('manager')->group(fun
     Route::get('search/stores', [StoreController::class, 'search']);
     Route::apiResource('customer', CustomerController::class);
     Route::get('search/customers', [CustomerController::class, 'search']);
+    Route::apiResource('employee', EmployeeController::class);
+    Route::get('search/employees', [EmployeeController::class, 'search']);
+    Route::apiResource('purchase', PurchaseTransactionController::class);
+    Route::get('search/purchase', [PurchaseTransactionController::class, 'search']);
 });
+
+Route::apiResource('statustransaction', StatusTransactionController::class);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

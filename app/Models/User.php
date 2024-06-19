@@ -54,6 +54,18 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public static function search($query)
+    {
+        return self::where('role', 'employee')
+                    ->where(function($q) use ($query) {
+                        $q->where('name', 'like', "%$query%")
+                          ->orWhere('username', 'like', "%$query%")
+                          ->orWhere('email', 'like', "%$query%")
+                          ->orWhere('phone', 'like', "%$query%");
+                    })
+                    ->get();
+    }
+
     public function transactions()
     {
         return $this->hasMany(PurchaseTransaction::class, 'id_user');
