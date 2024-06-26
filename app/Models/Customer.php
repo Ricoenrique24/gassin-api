@@ -27,4 +27,8 @@ class Customer extends Model
                     ->orWhere('price', 'like', "%$query%")
                     ->get();
     }
+    public function purchaseTransactions()
+    {
+        return $this->hasMany(PurchaseTransaction::class, 'id_customer', 'id');
+    }
 }

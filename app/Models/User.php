@@ -66,8 +66,13 @@ class User extends Authenticatable
                     ->get();
     }
 
-    public function transactions()
+    public function purchaseTransactions()
     {
-        return $this->hasMany(PurchaseTransaction::class, 'id_user');
+        return $this->hasMany(PurchaseTransaction::class, 'id_user', 'id');
+    }
+
+    public function resupplyTransactions()
+    {
+        return $this->hasMany(ResupplyTransaction::class, 'id_user', 'id');
     }
 }

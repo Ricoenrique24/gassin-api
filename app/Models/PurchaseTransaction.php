@@ -21,18 +21,27 @@ class PurchaseTransaction extends Model
 
     public static function search($query)
     {
-        return self::where('id_customer', 'like', "%{$query}%")
-            ->orWhere('id_user', 'like', "%{$query}%")
-            ->orWhere('qty', 'like', "%{$query}%")
-            ->orWhere('total_payment', 'like', "%{$query}%")
-            ->orWhere('status', 'like', "%{$query}%")
-            ->orWhere('note', 'like', "%{$query}%")
-            ->with('statusTransaction')
+        return self::join('users', 'purchase_transactions.id_user', '=', 'users.id')
+            ->join('customers', 'purchase_transactions.id_customer', '=', 'customers.id')
+            ->join('status_transactions', 'purchase_transactions.status', '=', 'status_transactions.id')
+            ->where('users.name', 'like', "%{$query}%")
+            ->orWhere('customers.name', 'like', "%{$query}%")
+            ->with(['statusTransaction', 'user', 'customer'])
+            ->select('purchase_transactions.*') // Pilih kolom dari purchase_transactions untuk menghindari konflik
             ->get();
     }
 
     public function statusTransaction()
     {
-        return $this->belongsTo(StatusTransaction::class, 'status', 'status');
+        return $this->belongsTo(StatusTransaction::class, 'status', 'id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user', 'id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'id_customer', 'id');
     }
 }

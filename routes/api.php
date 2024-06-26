@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\API\Transaction\StatusTransactionController;
+use App\Http\Controllers\API\Employee\TransactionController;
+use App\Http\Controllers\API\Manager\ResupplyTransactionController;
 use App\Http\Controllers\API\Manager\PurchaseTransactionController;
 use App\Http\Controllers\API\Manager\EmployeeController;
 use App\Http\Controllers\API\Manager\CustomerController;
@@ -27,16 +28,20 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware(['auth.apikey', 'role:manager'])->prefix('manager')->group(function () {
     Route::apiResource('store', StoreController::class);
-    Route::get('search/stores', [StoreController::class, 'search']);
+    Route::get('stores/search', [StoreController::class, 'search']);
     Route::apiResource('customer', CustomerController::class);
-    Route::get('search/customers', [CustomerController::class, 'search']);
+    Route::get('customers/search', [CustomerController::class, 'search']);
     Route::apiResource('employee', EmployeeController::class);
-    Route::get('search/employees', [EmployeeController::class, 'search']);
+    Route::get('employees/search', [EmployeeController::class, 'search']);
     Route::apiResource('purchase', PurchaseTransactionController::class);
-    Route::get('search/purchase', [PurchaseTransactionController::class, 'search']);
+    Route::get('purchases/search', [PurchaseTransactionController::class, 'search']);
+    Route::apiResource('resupply', ResupplyTransactionController::class);
+    Route::get('resupplys/search', [ResupplyTransactionController::class, 'search']);
 });
 
-Route::apiResource('statustransaction', StatusTransactionController::class);
+Route::middleware(['auth.apikey', 'role:employee'])->prefix('employee')->group(function () {
+    Route::apiResource('transaction', TransactionController::class);
+});
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

@@ -24,8 +24,8 @@ class UserSeeder extends Seeder
             'password' => bcrypt('12345678'),
             'phone' => '123456789',
             'role' => 'manager',
-            'apikey' => 'manager_api_key',
-            'token_fcm' => 'manager_token_fcm',
+            'apikey' => '',
+            'token_fcm' => '',
         ]);
 
         // Seed Employee Accounts

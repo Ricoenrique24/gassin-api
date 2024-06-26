@@ -13,7 +13,7 @@ class PurchaseTransactionController extends Controller
      */
     public function index()
     {
-        $purchaseTransactions = PurchaseTransaction::all();
+        $purchaseTransactions = PurchaseTransaction::with('statusTransaction', 'user', 'customer')->get();
 
         return response()->json([
             "error" => false,
@@ -28,8 +28,8 @@ class PurchaseTransactionController extends Controller
     public function store(Request $request)
     {
         $validator = $request->validate([
-            'id_customer' => 'required',
-            'id_user' => 'required',
+            'id_customer' => 'required|exists:customers,id',
+            'id_user' => 'required|exists:users,id',
             'qty' => 'required|integer',
             'total_payment' => 'required|numeric'
         ]);
@@ -49,7 +49,8 @@ class PurchaseTransactionController extends Controller
      */
     public function show($id)
     {
-        $purchaseTransaction = PurchaseTransaction::find($id);
+        $purchaseTransaction = PurchaseTransaction::with('statusTransaction', 'user', 'customer')
+        ->find($id);
 
         if (!$purchaseTransaction) {
             return response()->json([
@@ -119,20 +120,12 @@ class PurchaseTransactionController extends Controller
     try {
         $keyword = $request->input('q');
 
-        $purchaseTransactions = PurchaseTransaction::query()
-            ->where('id_customer', 'like', "%{$keyword}%")
-            ->orWhere('id_user', 'like', "%{$keyword}%")
-            ->orWhere('qty', 'like', "%{$keyword}%")
-            ->orWhere('total_payment', 'like', "%{$keyword}%")
-            ->orWhere('status', 'like', "%{$keyword}%")
-            ->orWhere('note', 'like', "%{$keyword}%")
-            ->with('statusTransaction')
-            ->get();
+        $purchaseTransactions = PurchaseTransaction::search($keyword);
 
         return response()->json([
             "error" => false,
             "message" => "Purchase Transactions fetched successfully",
-            "listPurchaseTransaction" => $purchaseTransactions
+            "listPurchase" => $purchaseTransactions
         ]);
     } catch (\Exception $e) {
         return response()->json([
@@ -141,4 +134,5 @@ class PurchaseTransactionController extends Controller
         ], 500);
     }
 }
+
 }

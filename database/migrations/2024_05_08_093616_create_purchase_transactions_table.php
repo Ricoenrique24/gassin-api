@@ -20,11 +20,11 @@ return new class extends Migration
             $table->string('status');
             $table->text('note')->nullable();
             $table->timestamps();
-    
-            // Foreign key 
+
+            // Foreign key
             $table->foreign('id_customer')->references('id')->on('customers');
             $table->foreign('id_user')->references('id')->on('users');
-            // $table->foreign('status')->references('status')->on('status_transactions'); 
+            // $table->foreign('status')->references('status')->on('status_transactions');
         });
     }
 

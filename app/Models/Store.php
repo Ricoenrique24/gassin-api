@@ -28,4 +28,9 @@ class Store extends Model
                     ->orWhere('price', 'like', "%$query%")
                     ->get();
     }
+
+    public function resupplyTransactions()
+    {
+        return $this->hasMany(ResupplyTransaction::class, 'id_store', 'id');
+    }
 }
