@@ -56,6 +56,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string|min:8',
+            'token_fcm' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -75,8 +76,10 @@ class AuthController extends Controller
         }
 
         $apikey = Str::random(60);  // Generate API key
+        $fcmToken = $request->token_fcm;
         $user->update([
-            'apikey' => $apikey
+            'apikey' => $apikey,
+            'token_fcm' => $fcmToken
         ]);
 
         return response()->json([

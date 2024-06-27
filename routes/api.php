@@ -41,6 +41,11 @@ Route::middleware(['auth.apikey', 'role:manager'])->prefix('manager')->group(fun
 
 Route::middleware(['auth.apikey', 'role:employee'])->prefix('employee')->group(function () {
     Route::apiResource('transaction', TransactionController::class);
+    Route::prefix('transactions')->group(function () {
+        Route::get('inProgress/{id}', [TransactionController::class, 'inProgress']);
+        Route::get('completed/{id}', [TransactionController::class, 'completed']);
+        Route::get('cancelled/{id}', [TransactionController::class, 'cancelled']);
+    });
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
