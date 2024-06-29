@@ -5,9 +5,10 @@ namespace App\Http\Controllers\API\Manager;
 use App\Http\Controllers\Controller;
 use App\Service\NotificationService;
 use App\Models\ResupplyTransaction;
-use App\Models\Store;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+
 
 class ResupplyTransactionController extends Controller
 {
@@ -50,11 +51,11 @@ class ResupplyTransactionController extends Controller
         $employee = User::find($request->id_user);
         $employeeToken = $employee->token_fcm;
 
-        $title = 'New Purchase Transaction';
-        $body = 'You have a new purchase transaction to handle.';
+        $title = 'New Resupply Transaction';
+        $body = 'You have a new resupply transaction to handle.';
         $contentData = [
             'transaction_id' => $resupplyTransaction->id,
-            'type' => 'purchase',
+            'type' => 'resupply',
         ];
 
         // Mengirim notifikasi ke pengguna
@@ -156,4 +157,58 @@ class ResupplyTransactionController extends Controller
             ], 500);
         }
     }
+    public function filter(Request $request)
+    {
+        $validated = $request->validate([
+            'status' => 'required|string',
+            'filterBy' => 'required|string|in:day,week,month,all'
+        ]);
+
+        $statusTransaction = $validated['status'];
+        $filterBy = $validated['filterBy'];
+
+        try {
+            $query = ResupplyTransaction::with('statusTransaction', 'user', 'store');
+
+            // Hanya tambahkan kondisi filter status jika status tidak "all"
+            if ($statusTransaction !== "all") {
+                $query->where('status', $statusTransaction);
+            }
+
+            switch ($filterBy) {
+                case "day":
+                    $today = Carbon::today();
+                    $query->whereDate('created_at', $today);
+                    break;
+                case "week":
+                    $startOfWeek = Carbon::now()->startOfWeek();
+                    $endOfWeek = Carbon::now()->endOfWeek();
+                    $query->whereBetween('created_at', [$startOfWeek, $endOfWeek]);
+                    break;
+                case "month":
+                    $startOfMonth = Carbon::now()->startOfMonth();
+                    $endOfMonth = Carbon::now()->endOfMonth();
+                    $query->whereBetween('created_at', [$startOfMonth, $endOfMonth]);
+                    break;
+                case "all":
+                default:
+                    // Tidak ada filter tambahan untuk "all" atau default
+                    break;
+            }
+
+            $resupplyTransactions = $query->get();
+
+            return response()->json([
+                'error' => false,
+                'message' => 'Resupply Transactions fetched successfully',
+                'listResupply' => $resupplyTransactions
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Failed to fetch Resupply Transactions: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

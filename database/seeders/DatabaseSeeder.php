@@ -16,7 +16,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CustomerSeeder::class,
             StoreSeeder::class,
-            StatusTransactionSeeder::class
+            StatusTransactionSeeder::class,
+            CategoryTransactionSeeder::class
         ]);
     }
 }

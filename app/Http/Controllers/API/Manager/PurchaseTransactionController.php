@@ -7,6 +7,7 @@ use App\Service\NotificationService;
 use Illuminate\Http\Request;
 use App\Models\PurchaseTransaction;
 use App\Models\User;
+use Carbon\Carbon;
 
 class PurchaseTransactionController extends Controller
 {
@@ -170,5 +171,45 @@ class PurchaseTransactionController extends Controller
         ], 500);
     }
 }
+    public function filter(Request $request)
+    {
+        $statusTransaction = $request->input('status');
+        $filterBy = $request->input('filterBy');
 
+        $query = PurchaseTransaction::with('statusTransaction', 'user', 'customer');
+
+        // Hanya tambahkan kondisi filter status jika status tidak "all"
+        if ($statusTransaction !== "all") {
+            $query->where('status', $statusTransaction);
+        }
+
+        switch ($filterBy) {
+            case "day":
+                $today = Carbon::today();
+                $query->whereDate('created_at', $today);
+                break;
+            case "week":
+                $startOfWeek = Carbon::now()->startOfWeek();
+                $endOfWeek = Carbon::now()->endOfWeek();
+                $query->whereBetween('created_at', [$startOfWeek, $endOfWeek]);
+                break;
+            case "month":
+                $startOfMonth = Carbon::now()->startOfMonth();
+                $endOfMonth = Carbon::now()->endOfMonth();
+                $query->whereBetween('created_at', [$startOfMonth, $endOfMonth]);
+                break;
+            case "all":
+            default:
+                // Tidak ada filter tambahan untuk "all" atau default
+                break;
+        }
+
+        $purchaseTransactions = $query->get();
+
+        return response()->json([
+            'error' => false,
+            'message' => 'Purchase Transactions fetched successfully',
+            'listPurchase' => $purchaseTransactions
+        ]);
+    }
 }

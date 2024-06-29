@@ -50,7 +50,7 @@ class TransactionController extends Controller
             });
 
         // Menggabungkan dan menyatukan hasil dari kedua query
-        $transactions = $purchaseTransactions->concat($resupplyTransactions);
+        $transactions = $purchaseTransactions->concat($resupplyTransactions)->sortByDesc('created_at')->values();
 
             return response()->json([
                 "error" => false,
@@ -107,7 +107,48 @@ class TransactionController extends Controller
             'message' => 'Transaction not found'
         ]);
     }
+    public function active(Request $request)
+    {
+        $apiKey = $request->bearerToken();
+        $user = User::where('apikey', $apiKey)->first();
 
+        if (!$user) {
+            return response()->json([
+                "error" => true,
+                "message" => "Unauthorized",
+            ]);
+        }
+
+        // Mengambil data PurchaseTransaction dan ResupplyTransaction dengan memuat relasi
+        $purchaseTransactions = PurchaseTransaction::with('statusTransaction', 'user', 'customer')
+            ->where('id_user', $user->id)
+            ->whereNot('status', '3')
+            ->whereNot('status', '4')
+            ->get()
+            ->map(function ($transaction) {
+                $transaction->type = 'purchase';
+                return $transaction;
+            });
+
+        $resupplyTransactions = ResupplyTransaction::with('statusTransaction', 'user', 'store')
+            ->where('id_user', $user->id)
+            ->whereNot('status', '3')
+            ->whereNot('status', '4')
+            ->get()
+            ->map(function ($transaction) {
+                $transaction->type = 'resupply';
+                return $transaction;
+            });
+
+        // Menggabungkan dan menyatukan hasil dari kedua query
+        $transactions = $purchaseTransactions->concat($resupplyTransactions)->sortByDesc('created_at')->values();
+
+            return response()->json([
+                "error" => false,
+                "message" => "Transactions fetched successfully",
+                "listTransaction" => $transactions
+            ]);
+    }
     /**
      * Update the specified resource in storage.
      */
