@@ -103,9 +103,7 @@ class ResupplyTransactionController extends Controller
             'id_store' => 'sometimes|required',
             'id_user' => 'sometimes|required',
             'qty' => 'sometimes|required|integer',
-            'total_payment' => 'sometimes|required|numeric',
-            'status' => 'sometimes|required',
-            'note' => 'nullable|string'
+            'total_payment' => 'sometimes|required|numeric'
         ]);
 
         $resupplyTransaction->update($validated);
@@ -210,5 +208,49 @@ class ResupplyTransactionController extends Controller
             ], 500);
         }
     }
+    public function cancelled(Request $request, $id)
+    {
+        $resupplyTransaction = ResupplyTransaction::with('statusTransaction', 'user', 'store')->findOrFail($id);
 
+        if (!$resupplyTransaction) {
+            return response()->json([
+                "error" => true,
+                "message" => "Resupply Transaction not found"
+            ]);
+        }
+
+        // Update status transaction
+        $resupplyTransaction->status = 4;
+        $resupplyTransaction->save();
+
+        $idEmployee = $resupplyTransaction->user->id;
+        // Mengambil employee
+        $employee = User::find($idEmployee);
+
+        if (!$employee) {
+            return response()->json([
+                "error" => true,
+                "message" => "Employee not found"
+            ], 404);
+        }
+
+        // Mengirim notifikasi ke setiap employee
+        $employeeToken = $employee->token_fcm;
+
+        $title = 'Pesanan Di Perbarui';
+        $body = 'You have a new resupply transaction to handle.';
+        $contentData = [
+            'transaction_id' => $resupplyTransaction->id,
+            'type' => 'resupply',
+            // Informasi tambahan sesuai kebutuhan
+        ];
+
+        // Mengirim notifikasi ke pengguna
+        $this->notificationService->sendNotificationToSpecificToken($employeeToken, $title, $body, $contentData);
+
+        return response()->json([
+            "error" => false,
+            "message" => "Pesanan berhasil diperbarui"
+        ]);
+    }
 }

@@ -103,9 +103,7 @@ class PurchaseTransactionController extends Controller
             'id_customer' => 'sometimes|required',
             'id_user' => 'sometimes|required',
             'qty' => 'sometimes|required|integer',
-            'total_payment' => 'sometimes|required|numeric',
-            'status' => 'sometimes|required',
-            'note' => 'nullable|string'
+            'total_payment' => 'sometimes|required|numeric'
         ]);
 
         $purchaseTransaction->update($validated);
@@ -212,4 +210,50 @@ class PurchaseTransactionController extends Controller
             'listPurchase' => $purchaseTransactions
         ]);
     }
+    public function cancelled(Request $request, $id)
+    {
+        $purchaseTransaction = PurchaseTransaction::with('statusTransaction', 'user', 'customer')->findOrFail($id);
+
+        if (!$purchaseTransaction) {
+            return response()->json([
+                "error" => true,
+                "message" => "Purchase Transaction not found"
+            ]);
+        }
+
+        // Update status transaction
+        $purchaseTransaction->status = 4;
+        $purchaseTransaction->save();
+
+        $idEmployee = $purchaseTransaction->user->id;
+        // Mengambil employee
+        $employee = User::find($idEmployee);
+
+        if (!$employee) {
+            return response()->json([
+                "error" => true,
+                "message" => "Employee not found"
+            ], 404);
+        }
+
+        // Mengirim notifikasi ke setiap employee
+        $employeeToken = $employee->token_fcm;
+
+        $title = 'Pesanan Di Perbarui';
+        $body = 'You have a new purchase transaction to handle.';
+        $contentData = [
+            'transaction_id' => $purchaseTransaction->id,
+            'type' => 'purchase',
+            // Informasi tambahan sesuai kebutuhan
+        ];
+
+        // Mengirim notifikasi ke pengguna
+        $this->notificationService->sendNotificationToSpecificToken($employeeToken, $title, $body, $contentData);
+
+        return response()->json([
+            "error" => false,
+            "message" => "Pesanan berhasil diperbarui"
+        ]);
+    }
+
 }

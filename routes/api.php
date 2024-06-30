@@ -41,11 +41,13 @@ Route::middleware(['auth.apikey', 'role:manager'])->prefix('manager')->group(fun
     Route::prefix('purchases')->group(function () {
         Route::get('search', [ManagerPurchaseTransactionController::class, 'search']);
         Route::get('filter', [ManagerPurchaseTransactionController::class, 'filter']);
+        Route::get('cancelled/{id}', [ManagerPurchaseTransactionController::class, 'cancelled']);
     });
     Route::apiResource('resupply', ManagerResupplyTransactionController::class);
     Route::prefix('resupplys')->group(function () {
         Route::get('search', [ManagerResupplyTransactionController::class, 'search']);
         Route::get('filter', [ManagerResupplyTransactionController::class, 'filter']);
+        Route::get('cancelled/{id}', [ManagerResupplyTransactionController::class, 'cancelled']);
     });
     Route::prefix('operation')->group(function () {
         Route::get('/', [ManagerOperationTransactionController::class, 'index']);
@@ -64,11 +66,14 @@ Route::middleware(['auth.apikey', 'role:employee'])->prefix('employee')->group(f
     Route::prefix('transaction')->group(function () {
         Route::get('/', [EmployeeTransactionController::class, 'index']);
         Route::get('/{id}', [EmployeeTransactionController::class, 'show']);
-        Route::get('active', [EmployeeTransactionController::class, 'active']);
         Route::get('inProgress/{id}', [EmployeeTransactionController::class, 'inProgress']);
         Route::get('completed/{id}', [EmployeeTransactionController::class, 'completed']);
         Route::get('cancelled/{id}', [EmployeeTransactionController::class, 'cancelled']);
     });
+    Route::prefix('transactions')->group(function () {
+        Route::get('active', [EmployeeTransactionController::class, 'active']);
+    });
+
     Route::prefix('operation')->group(function () {
         Route::post('/', [EmployeeOperationTransactionController::class, 'store']);
         Route::get('/{id}', [EmployeeOperationTransactionController::class, 'show']);
